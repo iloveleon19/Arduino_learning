@@ -1,0 +1,10 @@
+{
+    "arduino.defaultBaudRate": 115200,
+    "sketch": "sketch_oct21a.ino",
+    "port": "COM6",
+    "board": "esp8266:esp8266:huzzah",
+    "output": "../build",
+    "debugger": "jlink",
+    "prebuild": "bash prebuild.sh",
+    "configuration": "CpuFrequency=80,VTable=flash,FlashSize=4M1M,LwIPVariant=v2mss536,Debug=Disabled,DebugLevel=None____,FlashErase=none,UploadSpeed=115200"
+}

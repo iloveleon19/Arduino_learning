@@ -1,0 +1,8 @@
+{
+    "sketch": "004.control_device.ino",
+    "port": "COM3",
+    "board": "esp8266:esp8266:huzzah",
+    "output": "../build",
+    "debugger": "jlink",
+    "prebuild": "bash prebuild.sh"
+}

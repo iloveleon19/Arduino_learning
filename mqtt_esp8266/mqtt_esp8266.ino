@@ -29,18 +29,16 @@
 
 // Clients
 WiFiClient espClient;
-
 PubSubClient client(espClient);
 
 // Creat a aREST instance
 aREST rest = aREST(client);
 
 // Unique ID to identify the device for cloud.arest.io
-char* device_id = "IOT_B_4154";
+char* device_id = "IOT_B_0153";
 
 // Update these with values suitable for your network.
-
-const char* ssid = "";
+const char* ssid = "TOTOLINK N302RE";
 const char* password = "";
 const char* mqtt_server = "broker.mqtt-dashboard.com";
 
@@ -49,14 +47,20 @@ long lastMsg = 0;
 char msg[50];
 int value = 0;
 
+//Functions
+void callback(char* topic, byte* payload, unsigned int length);
+
 void setup() {
-  pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
+  // pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
   Serial.begin(115200);
+
+  // client.setServer(mqtt_server, 1883);
+  client.setCallback(callback);
+
   rest.set_id(device_id);
   rest.set_name("devices_control");
+  
   setup_wifi();
-  client.setServer(mqtt_server, 1883);
-  client.setCallback(callback);
 }
 
 void setup_wifi() {
@@ -81,23 +85,7 @@ void setup_wifi() {
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
-  }
-  Serial.println();
-
-  // Switch on the LED if an 1 was received as first character
-  if ((char)payload[0] == '1') {
-    digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
-    // but actually the LED is on; this is because
-    // it is acive low on the ESP-01)
-  } else {
-    digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
-  }
-
+  rest.handle_callback(client, topic, payload, length);
 }
 
 void reconnect() {
@@ -121,20 +109,7 @@ void reconnect() {
   }
 }
 void loop() {
-
-  if (!client.connected()) {
-    reconnect();
-  }
-  client.loop();
-
-  long now = millis();
-  if (now - lastMsg > 2000) {
-    lastMsg = now;
-    ++value;
-    snprintf (msg, 75, "hello world #%ld", value);
-    Serial.print("Publish message: ");
-    Serial.println(msg);
-    client.publish("outTopic", msg);
-  }
+  // connect to the cloud
+  rest.handle(client);
 }
 

@@ -26,6 +26,16 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <aREST.h>
+#include "DHT.h"
+
+// Pin
+#define DHTPIN 5
+
+// Use DHT11 sensor
+#define DHTTYPE DHT11
+
+// Initialize DHT sensor
+DHT dht(DHTPIN, DHTTYPE, 15);
 
 // Clients
 WiFiClient espClient;
@@ -42,7 +52,6 @@ const char* ssid = "TOTOLINK N302RE";
 const char* password = "";
 const char* mqtt_server = "broker.mqtt-dashboard.com";
 
-
 long lastMsg = 0;
 char msg[50];
 int value = 0;
@@ -54,6 +63,9 @@ void setup() {
   // pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
   Serial.begin(115200);
 
+  // Init DHT 
+  dht.begin();
+
   // client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
 
@@ -64,7 +76,6 @@ void setup() {
 }
 
 void setup_wifi() {
-
   delay(10);
   // We start by connecting to a WiFi network
   Serial.println();
@@ -84,32 +95,28 @@ void setup_wifi() {
   Serial.println(WiFi.localIP());
 }
 
-void callback(char* topic, byte* payload, unsigned int length) {
-  rest.handle_callback(client, topic, payload, length);
-}
-
-void reconnect() {
-  // Loop until we're reconnected
-  while (!client.connected()) {
-    Serial.print("Attempting MQTT connection...");
-    // Attempt to connect
-    if (client.connect("ESP8266Client")) {
-      Serial.println("connected");
-      // Once connected, publish an announcement...
-      client.publish("outTopic", "hello world");
-      // ... and resubscribe
-      client.subscribe("inTopic");
-    } else {
-      Serial.print("failed, rc=");
-      Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
-      // Wait 5 seconds before retrying
-      delay(5000);
-    }
-  }
-}
 void loop() {
+  // Reading temperature and humidity
+  float h = dht.readHumidity();
+  // Read temperature as Celsius
+  float t = dht.readTemperature();
+  
+  // Display data
+  Serial.print("Humidity: "); 
+  Serial.print(h);
+  Serial.print(" %\t");
+  Serial.print("Temperature: "); 
+  Serial.print(t);
+  Serial.println(" *C ");
+  // Wait a few seconds between measurements.
+  delay(1000);
+  
   // connect to the cloud
   rest.handle(client);
+  rest.publish(client, "temperature", t);
+}
+
+void callback(char* topic, byte* payload, unsigned int length) {
+  rest.handle_callback(client, topic, payload, length);
 }
 

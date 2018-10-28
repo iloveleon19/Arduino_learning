@@ -8,3 +8,4 @@ ESP8266
 >* http://ai2.appinventor.mit.edu
 >* https://dashboard.arest.io/
 >* https://cloud.arest.io/'your-device-name'
+>* https://cloud.arest.io/
